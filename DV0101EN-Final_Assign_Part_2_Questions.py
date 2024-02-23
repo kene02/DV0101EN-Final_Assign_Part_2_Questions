@@ -18,7 +18,7 @@ data = pd.read_csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain
 app = dash.Dash(__name__)
 
 # Set the title of the dashboard
-#app.title = "Automobile Statistics Dashboard"
+app.title = "Automobile Statistics Dashboard"
 
 #---------------------------------------------------------------------------------
 # Create the dropdown menu options
@@ -47,6 +47,7 @@ app.layout = html.Div([
     html.Div(dcc.Dropdown(
             id='select-year',
             options=[{'label': i, 'value': i} for i in year_list],
+            value='Select-year',
             placeholder='Select a year',
             #style={'width':'80%','padding':'3px','font-size':'20px','text-align-last':'center'}
         )),
@@ -63,17 +64,17 @@ def update_input_container(selected_statistics):
     if selected_statistics =='Yearly Statistics': 
         return False
     else: 
-        return 'Recession Period Statistics'
+        return True
 
 #Callback for plotting
 # Define the callback function to update the input container based on the selected statistics
 @app.callback(
     Output(component_id='output-container', component_property='children'),
-    [Input(component_id='select-year', component_property='value'), 
-     Input(component_id='dropdown-statistics', component_property='value')])
+    [Input(component_id='dropdown-statistics', component_property='value'), 
+     Input(component_id='select-year', component_property='value')])
 
 
-def update_output_container(input_year, selected_statistics):
+def update_output_container(selected_statistics, input_year):
     if selected_statistics == 'Recession Period Statistics':
         # Filter the data for recession periods
         recession_data = data[data['Recession'] == 1]
@@ -108,12 +109,15 @@ def update_output_container(input_year, selected_statistics):
                 title="Total Advertising Expenditure over Recession Period by Vehicle Type"))
 
 # Plot 4 bar chart for the effect of unemployment rate on vehicle type and sales
-        unemployment = recession_data.groupby('unemployment_rate')['Automobile_Sales'].mean().reset_index()                           
+        unemp_data = recession_data.groupby(['Vehicle_Type', 'unemployment_rate'])['Automobile_Sales'].mean().reset_index()
         R_chart4 = dcc.Graph(
-            figure=px.bar(unemployment, 
-                x='unemployment_rate',
-                y='Automobile_Sales',
-                title="Average Automobile Sales over Recession Period by Unemployment Rate"))
+            figure=px.bar(
+                unemp_data,
+                x='........',
+                y='........',
+                labels={'unemployment_rate': 'Unemployment Rate', 'Automobile_Sales': 'Average Automobile Sales'},
+                title="Effect of Unemployment Rate on Sales of various Vehicle Types")
+        )
 
 
         return [
